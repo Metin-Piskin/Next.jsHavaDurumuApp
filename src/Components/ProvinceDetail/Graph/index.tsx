@@ -1,7 +1,12 @@
 import React, { useState, useRef } from "react";
 import { useDimensions } from "webrix/hooks";
 
-const Line = ({ path, color }) => {
+interface LineProps {
+  path: number[];
+  color: string;
+}
+
+const Line: React.FC<LineProps> = ({ path, color }) => {
   const dx = 100 / (path.length - 1);
   const d = `M0,${path[0]} ${path
     .slice(1)
@@ -30,18 +35,34 @@ const Line = ({ path, color }) => {
   );
 };
 
-const Points = ({ data, width, height, setActive, range }) => {
-  const timeout = useRef();
+interface PointsProps {
+  data: number[][];
+  width: number;
+  height: number;
+  setActive: React.Dispatch<
+    React.SetStateAction<{ path: number; point: number } | null>
+  >;
+  range: [number, number];
+}
+
+const Points: React.FC<PointsProps> = ({
+  data,
+  width,
+  height,
+  setActive,
+  range,
+}) => {
+  const timeout = useRef<NodeJS.Timeout>();
   const dr = Math.abs(range[1] - range[0]);
-  const activate = (path, point) => {
+  const activate = (path: number, point: number) => {
     clearTimeout(timeout.current);
     setActive({ path, point });
   };
-  const deactivate = (path, point) => {
+  const deactivate = (path: number, point: number) => {
     clearTimeout(timeout.current);
     timeout.current = setTimeout(() => {
       setActive((cur) => {
-        if (cur.path === path && cur.point === point) {
+        if (cur?.path === path && cur?.point === point) {
           return null;
         }
         return cur;
@@ -57,7 +78,7 @@ const Points = ({ data, width, height, setActive, range }) => {
             style={{
               "--x": `${(i * width) / (row.length - 1)}px`,
               "--y": `${height - y * (height / dr)}px`,
-            }}
+            } as React.CSSProperties}
             onMouseEnter={() => activate(r, i)}
             onMouseLeave={() => deactivate(r, i)}
           />
@@ -67,7 +88,18 @@ const Points = ({ data, width, height, setActive, range }) => {
   );
 };
 
-const Marker = ({
+interface MarkerProps {
+  colors: string[];
+  labels: string[];
+  data: number[][];
+  active: { path: number; point: number } | null;
+  width: number;
+  height: number;
+  range: [number, number];
+  state: string;
+}
+
+const Marker: React.FC<MarkerProps> = ({
   colors,
   labels,
   data,
@@ -77,23 +109,30 @@ const Marker = ({
   range,
   state,
 }) => {
-  const { path, point } = active || {};
+  if (!active) return null; // Return null if active is null or undefined
+
+  const { path, point } = active;
+  if (path === undefined || point === undefined) return null; // Additional guard
+
   const value = data[path]?.[point];
+  if (value === undefined) return null; // Guard for value being undefined
+
   const dr = Math.abs(range[1] - range[0]);
+
   return (
     <div
       className="marker"
       style={{
-        opacity: active ? 1 : 0,
+        opacity: 1,
         "--color": colors[path],
         "--x": `${(point * width) / (data[path]?.length - 1)}px`,
         "--y": `${height - value * (height / dr)}px`,
-      }}
+      } as React.CSSProperties}
     >
       <div className="tooltip">
         <span>{labels[point]}</span>
         <span>
-          {value?.toLocaleString?.()}
+          {value.toLocaleString?.()}
           {state}
         </span>
       </div>
@@ -103,9 +142,21 @@ const Marker = ({
   );
 };
 
-const Graph = ({ data, colors, range, labels, state }) => {
-  const [active, setActive] = useState({ path: 1, point: 2 });
-  const graph = useRef();
+
+interface GraphProps {
+  data: number[][];
+  colors: string[];
+  range: [number, number];
+  labels: string[];
+  state: string;
+}
+
+const Graph: React.FC<GraphProps> = ({ data, colors, range, labels, state }) => {
+  const [active, setActive] = useState<{ path: number; point: number } | null>({
+    path: 1,
+    point: 2,
+  });
+  const graph = useRef<HTMLDivElement>(null);
   const { width, height } = useDimensions(graph);
   return (
     <div className="graph" ref={graph}>
@@ -154,7 +205,14 @@ const Graph = ({ data, colors, range, labels, state }) => {
   );
 };
 
-const App = ({ LABELS, DATA, STATE, COLOR }) => (
+interface AppProps {
+  LABELS: string[];
+  DATA: number[][];
+  STATE: string;
+  COLOR: number;
+}
+
+const App: React.FC<AppProps> = ({ LABELS, DATA, STATE, COLOR }) => (
   <Graph
     data={DATA}
     colors={[

@@ -132,7 +132,7 @@ const page = () => {
                 ? [data?.list.map((e: any) => e.main.humidity).slice(0, 8)]
                 : state === "Rüzgar"
                 ? [data?.list.map((e: any) => e.wind.gust).slice(0, 8)]
-                : null
+                : []
             }
           />
           <div className="mx-24 flex gap-5 items-center my-12">
