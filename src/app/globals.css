@@ -6,16 +6,6 @@ body {
     background-color: #333333;
 }
 
-$breakpoints: (
-    sm: 520px,
-    md: 760px,
-);
-
-@mixin media($bp) {
-    @media screen and (max-width: map_get($breakpoints, $bp)) {
-        @content;
-    }
-}
 
 
 
@@ -48,10 +38,7 @@ $breakpoints: (
         margin-bottom: -2rem;
         color: #b7bbc8;
 
-        @include media('sm') {
-            font-size: 0.8rem;
-            margin: 0.5rem;
-        }
+        
     }
 }
 
@@ -155,15 +142,7 @@ $breakpoints: (
     gap: 0 1rem;
     margin: 3rem;
 
-    @include media('md') {
-        justify-content: flex-end;
-        margin: 2rem;
-    }
-
-    @include media('sm') {
-        margin: 1rem;
-        font-size: 0.8rem;
-    }
+   
 
     >div {
         display: flex;
